@@ -2,12 +2,13 @@
   "name": "ffc-lototech25-server",
   "version": "1.0.0",
   "description": "Servidor backend do FFC LotoTech25",
-  "main": "server.js",
+  "main": "src/server.js",
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js"
   },
   "dependencies": {
+    "cors": "^2.8.6",
     "express": "^5.2.1",
     "sqlite3": "^6.0.1"
   }
