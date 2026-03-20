@@ -4,6 +4,7 @@ import { Alert, Text, View } from "react-native"
 import AppButton from "../components/AppButton"
 import Button from "../components/Button"
 import styles from "../styles/globalStyles"
+import { BASE_URL } from "../utils/config"
 
 export default function ResultadoAnterior() {
 
@@ -34,7 +35,7 @@ export default function ResultadoAnterior() {
 
   try {
 
-   const response = await fetch("https://ffc-lototech25-server.onrender.com/resultados", {
+   const response = await fetch(`${BASE_URL}/resultados`, {
     method: "POST",
     headers: {
      "Content-Type": "application/json"

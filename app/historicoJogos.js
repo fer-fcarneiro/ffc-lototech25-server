@@ -125,10 +125,17 @@ export default function HistoricoJogos(){
 
       <TouchableOpacity onPress={()=>toggle(index)}>
 
-       <Text style={styles.cabecalho}>
-        {abertos[index] ? "▼" : "▶"} 
-        Grupo {index+1} • {grupo.data} {grupo.hora} • {grupo.quantidade} jogos
-       </Text>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+
+  <Text style={{ fontSize: 22, marginRight: 8 }}>
+    {abertos[index] ? "▼" : "▶"}
+  </Text>
+
+  <Text style={styles.cabecalho}>
+    Grupo {index+1} • {grupo.data} {grupo.hora} • {grupo.quantidade} jogos
+  </Text>
+
+</View>
 
       </TouchableOpacity>
 

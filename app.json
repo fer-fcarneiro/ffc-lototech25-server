@@ -4,7 +4,7 @@
     "slug": "ffc-lototech25",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/iconNovo.png",
     "scheme": "ffclototech25",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -24,17 +24,18 @@
       "favicon": "./assets/images/favicon.png"
     },
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splashNovo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ff0000"
+      "backgroundColor": "#0a7ea4"
     },
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
       "eas": {
-        "projectId": "353ea9c4-960e-4c67-8187-93a001b8fdab"
+        "projectId": "6333d78a-92c5-4ac5-ae66-7d7936414bb6"
       }
-    }
+    },
+    "owner": "fernandofc"
   }
 }

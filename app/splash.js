@@ -21,7 +21,7 @@ export default function Splash(){
   <View style={styles.container}>
 
    <Image
-    source={require("../assets/splash.png")}
+    source={require("../assets/splashNovo.png")}
     style={styles.logo}
     resizeMode="contain"
    />
@@ -42,8 +42,8 @@ const styles = StyleSheet.create({
  },
 
  logo:{
-  width:300,
-  height:300
+  width:500,
+  height:500
  }
 
 })

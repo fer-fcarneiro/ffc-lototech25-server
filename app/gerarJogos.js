@@ -306,14 +306,15 @@ const styles = StyleSheet.create({
  container:{
   flex:1,
   paddingHorizontal:12,
-  paddingTop:10
+ 
+  
  },
 
  title:{
   fontSize:18,
   fontWeight:"bold",
   textAlign:"center",
-  marginBottom:10
+  marginBottom:1
  },
 
  section:{

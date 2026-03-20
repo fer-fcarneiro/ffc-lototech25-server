@@ -137,6 +137,7 @@ import { useState } from "react"
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native"
 import AppButton from "../components/AppButton"
 import styles from "../styles/globalStyles"
+import { BASE_URL } from "../utils/config"
 
 export default function Login() {
 
@@ -149,7 +150,7 @@ export default function Login() {
 
   try {
 
-   const response = await fetch("https://ffc-lototech25-server.onrender.com/users/login", {
+   const response = await fetch(`${BASE_URL}/users/login`, {
     method: "POST",
     headers: {
      "Content-Type": "application/json"
