@@ -1,3 +1,6 @@
+
+console.log("🚀 Iniciando servidor...")
+
 const app = require("./app")
 const connectMongo = require("./database/mongo") // 👈 NOVO
 
