@@ -100,7 +100,7 @@ export default function GerarJogos(){
 
  }
 
- async function gerar(){
+  /* async function gerar(){
 
   if(plano !== "pro" && quantidade > 20){
 
@@ -156,7 +156,66 @@ export default function GerarJogos(){
 
   }
 
- }
+ } */
+async function gerar(){
+
+  // 🔥 limpa estado da rodada anterior
+  setPares([])
+  setRepetidas([])
+
+  if(plano !== "pro" && quantidade > 20){
+    Alert.alert(
+      "Plano PRO",
+      "Gerar mais de 20 apostas é exclusivo do plano PRO."
+    )
+    return
+  }
+
+  try{
+    await AsyncStorage.removeItem("resultado")
+  }catch(e){
+    console.log("Erro ao limpar resultado", e)
+  }
+
+  console.log("DEZENAS:", dezenas)
+  console.log("PARES:", pares)
+  console.log("REPETIDAS:", repetidas)
+
+  try{
+
+    // 🔥 garante arrays limpos
+    const paresLimpos = []
+    const repetidasLimpos = []
+
+    const jogosGerados = gerarJogosFiltrados(
+      quantidade,
+      dezenas,
+      paresLimpos,
+      repetidasLimpos
+    )
+
+    console.log("JOGOS GERADOS:", jogosGerados)
+
+    await salvarHistorico(jogosGerados)
+
+    Alert.alert(
+      "FFC LotoTech",
+      `Novo grupo gerado\nJogos: ${jogosGerados.length}`,
+      [
+        {
+          text:"OK",
+          onPress:()=>router.push("/historicoJogos")
+        }
+      ]
+    )
+
+  }catch(erro){
+
+    console.log("ERRO AO GERAR:",erro)
+
+  }
+
+}
 
  async function salvarHistorico(jogosGerados){
 

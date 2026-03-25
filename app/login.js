@@ -166,6 +166,8 @@ export default function Login() {
    console.log("RESPOSTA SERVIDOR:", data)
 
    if(response.ok){
+   
+   
 
     await AsyncStorage.setItem("usuarioId", data.id.toString())
     await AsyncStorage.setItem("emailUsuario", data.email)
@@ -179,7 +181,7 @@ export default function Login() {
       [
        {
         text:"OK",
-        onPress:()=>router.replace("/")
+        onPress:()=>router.replace("/resultadoAnterior")
        }
       ]
      )
@@ -193,7 +195,7 @@ export default function Login() {
      [
       {
        text:"OK",
-       onPress:()=>router.replace("/")
+       onPress:()=>router.replace("/resultadoAnterior")
       }
      ]
     )
@@ -287,7 +289,7 @@ export default function Login() {
       color:"#0a7ea4",
       fontWeight:"bold"
      }}>
-      Criar nova conta
+      Criar nova conta Pró
      </Text>
     </TouchableOpacity>
 

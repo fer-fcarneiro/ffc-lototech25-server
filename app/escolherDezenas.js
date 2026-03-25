@@ -44,7 +44,7 @@ export default function EscolherDezenas(){
     return prev.filter(n => n !== num)
    }
 
-   const limite = plano === "pro" ? 25 : 18
+   const limite = plano === "pro" ? 25 : 17
 
    if(prev.length >= limite){
 
@@ -52,7 +52,7 @@ export default function EscolherDezenas(){
      "Limite atingido",
      plano === "pro"
       ? "Limite máximo de 25 dezenas."
-      : "Plano FREE permite escolher até 18 dezenas."
+      : "Plano FREE permite escolher até 17 dezenas."
     )
 
     return prev

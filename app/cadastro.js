@@ -1,5 +1,5 @@
 
-import { useRouter } from "expo-router"
+import { useLocalSearchParams, useRouter } from "expo-router"
 import { useState } from "react"
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native"
 import AppButton from "../components/AppButton"
@@ -9,6 +9,12 @@ import { BASE_URL } from "../utils/config"
 export default function Cadastro(){
 
  const router = useRouter()
+
+ // 🔥 recebe o plano vindo do index
+ const { plano: planoParam } = useLocalSearchParams()
+
+ // 🔥 define o plano (default = free)
+ const [plano, setPlano] = useState(planoParam || "free")
 
  const [email,setEmail] = useState("")
  const [senha,setSenha] = useState("")
@@ -37,21 +43,29 @@ export default function Cadastro(){
     headers:{
      "Content-Type":"application/json"
     },
-    body:JSON.stringify({
-     email,
-     senha
+    body: JSON.stringify({
+     email: email.trim().toLowerCase(),
+     senha: senha.trim(),
+     plano // 🔥 agora dinâmico (free ou pro)
     })
    })
 
-   const data = await response.json()
+   let data = {}
 
-   console.log("CADASTRO:",data)
+try {
+ data = await response.json()
+} catch {
+ data = {}
+}
+   console.log("CADASTRO RESPONSE:", data)
+   //console.log("CADASTRO:",data)
+   console.log("PLANO USADO:", plano)
 
    if(response.ok){
 
     Alert.alert(
      "Conta criada",
-     "Cadastro realizado com sucesso",
+     `Cadastro realizado com sucesso (${plano.toUpperCase()})`,
      [
       {
        text:"OK",
@@ -102,10 +116,20 @@ export default function Cadastro(){
     <Text style={{
      fontSize:20,
      fontWeight:"bold",
-     marginBottom:20,
+     marginBottom:10,
      textAlign:"center"
     }}>
      Criar Conta
+    </Text>
+
+    {/* 🔥 MOSTRA O PLANO */}
+    <Text style={{
+     textAlign:"center",
+     marginBottom:15,
+     fontWeight:"bold",
+     color: plano === "pro" ? "#0a7ea4" : "#555"
+    }}>
+     Plano selecionado: {plano.toUpperCase()}
     </Text>
 
     <TextInput

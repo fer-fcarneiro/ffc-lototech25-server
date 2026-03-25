@@ -1,7 +1,14 @@
-
+/*
 import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
-import { Alert, Animated, Linking, ScrollView, Text, TouchableOpacity, View } from "react-native"
+import {
+  Animated,
+  Linking,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native"
 
 import AppButton from "../components/AppButton"
 import styles from "../styles/globalStyles"
@@ -9,199 +16,411 @@ import { verificarPlanoServidor } from "../utils/verificarPlanoServidor"
 
 export default function Index() {
 
- const router = useRouter()
+  const router = useRouter()
 
- const [plano,setPlano] = useState("free")
- const [carregando,setCarregando] = useState(true)
+  const [plano, setPlano] = useState("free")
+  const [carregando, setCarregando] = useState(true)
 
- const fadeAnim = useState(new Animated.Value(0))[0]
+  const fadeAnim = useState(new Animated.Value(0))[0]
 
- useEffect(()=>{
+  useEffect(() => {
 
-  async function carregarPlano(){
+    async function carregarPlano() {
+      const planoServidor = await verificarPlanoServidor()
+      setPlano(planoServidor)
 
-   const planoServidor = await verificarPlanoServidor()
-   setPlano(planoServidor)
+      setTimeout(() => {
+        setCarregando(false)
+      }, 3000)
+    }
 
-   setTimeout(()=>{
-    setCarregando(false)
-   },5000)
+    carregarPlano()
 
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 3000,
+      useNativeDriver: true
+    }).start()
+
+  }, [])
+
+  function abrirSuporte() {
+    Linking.openURL("https://fer-fcarneiro.github.io/FFC.dev.apps/")
   }
 
-  carregarPlano()
+  if (carregando) {
+    return (
+      <View style={{
+        flex: 1,
+        backgroundColor: "#0a7ea4",
+        justifyContent: "center",
+        alignItems: "center"
+      }}>
+        <Animated.Image
+          source={require("../assets/splashNovo.png")}
+          style={{
+            width: 300,
+            height: 300,
+            opacity: fadeAnim,
+            transform: [{ scale: fadeAnim }]
+          }}
+          resizeMode="contain"
+        />
+      </View>
+    )
+  }
 
-  Animated.timing(fadeAnim,{
-   toValue:1,
-   duration:5000,
-   useNativeDriver:true
-  }).start()
+  return (
 
- },[])
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingBottom: 120 }}
+    >
 
- function ativarPro(){
+      <View style={styles.container}>
 
-  Alert.alert(
-   "FFC LotoTech25 PRO",
-   "Vantagens do plano PRO:\n\n" +
-   "✔ Gerar até 500 apostas\n" +
-   "✔ Exportar histórico em PDF\n" +
-   "✔ Filtros avançados\n" +
-   "✔ Escolher dezenas manualmente\n" +
-   "✔ Controle de pares e ímpares\n",
-   [
-    { text:"Cancelar" },
-    { text:"Ativar PRO", onPress:()=>router.push("/login") }
-   ]
-  )
+        <Text style={styles.titulo}>
+          FFC LotoTech25
+        </Text>
 
- }
+        <Text style={{ textAlign: "center", marginBottom: 20 }}>
+          Gerador inteligente com filtros estatísticos para jogos da Lotofácil
+          e conferidor com histórico automático de jogos gerados.
+        </Text>
+          {/* 📊 FREE *//*}
+        <Text style={styles.titulo}>Plano Free</Text>
 
- function abrirSuporte(){
-  Linking.openURL("https://fer-fcarneiro.github.io/FFC.dev.apps/")
- }
+        <Text>✔ Soma entre 185 até 228</Text>
+        <Text>✔ Repetidos entre 7 até 11</Text>
+        <Text>✔ Escolher até 18 dezenas</Text>
 
- if(carregando){
+        {/* ⭐ PRO *//*}
+        <View style={{ marginTop: 30 }}>
 
-  return(
+          <Text style={{
+            textAlign: "center",
+            fontWeight: "bold",
+            fontSize: 16
+          }}>
+            ⭐ FFC LotoTech25 PRO
+          </Text>
 
-   <View style={{
-    flex:1,
-    backgroundColor:"#0a7ea4",
-    justifyContent:"center",
-    alignItems:"center"
-   }}>
+          <Text style={{ textAlign: "center" }}>
+            ✔ Escolher 6 até 9 pares
+          </Text>
 
-    <Animated.Image
-     source={require("../assets/splashNovo.png")}
-     style={{
-      width:500,
-      height:500,
-      opacity:fadeAnim,
-      transform:[{ scale: fadeAnim }]
-     }}
-     resizeMode="contain"
-    />
+          <Text style={{ textAlign: "center" }}>
+            ✔ Gerar até 500 apostas
+          </Text>
 
-   </View>
+          <Text style={{ textAlign: "center" }}>
+            ✔ Filtros avançados
+          </Text>
 
-  )
+          <Text style={{ textAlign: "center" }}>
+            ✔ Escolher até 25 dezenas
+          </Text>
 
- }
+          <Text style={{ textAlign: "center" }}>
+            ✔ Exportar histórico em PDF
+          </Text>
 
- return (
+          {plano === "pro" && (
+            <Text style={{
+              textAlign: "center",
+              marginTop: 15,
+              fontWeight: "bold",
+              color: "green"
+            }}>
+              ⭐ Plano PRO ativo
+            </Text>
+          )}
 
-<ScrollView
- style={{flex:1}}
- contentContainerStyle={{ paddingBottom:120 }}
->
+        </View>
+          
 
- <View style={styles.container}>
+        {/* 🆕 CADASTRO *//*}
+        <AppButton
+          title="Criar conta FREE"
+          onPress={() => router.push("/cadastro?plano=free")}
+        />
 
-  <Text style={styles.titulo}>
-   FFC LotoTech25
-  </Text>
+        <AppButton
+          title="Criar conta PRO"
+          onPress={() => router.push("/cadastro?plano=pro")}
+        />
 
-  <Text style={{ textAlign:"center", marginBottom:20 }}>
-   Gerador inteligente com filtros estatísticos para jogos da Lotofácil 
-   e conferidor atualizando automaticamente histórico de jogos gerados.
-  </Text>
+         {/* 🔐 LOGIN *//*}
+        <AppButton
+          title="Entrar"
+          onPress={() => router.push("/login")}
+        />
 
-  <Text style={styles.titulo}> Plano Free</Text>
+        
 
-  <Text>✔ Soma entre 185 até 228 .</Text>
-  <Text>✔ Repetidos entre 7 até 11 .</Text>
-  <Text>✔ Escolher até 18 dezenas . </Text>
+        {/* INFO *//*}
+        <Text style={{
+          marginTop: 20,
+          textAlign: "center"
+        }}>
+          O aplicativo utiliza padrões estatísticos de concursos anteriores
+          para gerar jogos mais equilibrados.
+        </Text>
 
-  <Text style={{ marginTop:20, textAlign:"center" }}>
-   O aplicativo utiliza organização matemática e padrões
-   estatísticos observados em concursos anteriores
-   para ajudar na geração de jogos mais equilibrados.
-  </Text>
-
-  <Text style={{
-   marginTop:15,
-   textAlign:"center",
-   fontSize:13,
-   color:"#d84949"
-  }}>
-   Atenção: este aplicativo é apenas uma ferramenta de apoio
+        <Text style={{
+          marginTop: 15,
+          textAlign: "center",
+          fontSize: 13,
+          color: "#d84949"
+        }}>
+          Atenção: este aplicativo é apenas uma ferramenta de apoio
    matemático e estatístico. Não garante prêmios ou acertos,
    pois os resultados das loterias são aleatórios.
-  </Text>
+        </Text>
 
-  <TouchableOpacity onPress={abrirSuporte}>
-   <Text style={{textAlign:"center",color:"#0a7ea4"}}>
-    Suporte
-   </Text>
-  </TouchableOpacity>
+        {/* SUPORTE *//*}
+        <TouchableOpacity onPress={abrirSuporte}>
+          <Text style={{
+            textAlign: "center",
+            color: "#0a7ea4",
+            marginTop: 10
+          }}>
+            Suporte
+          </Text>
+        </TouchableOpacity>
 
-  <AppButton
-   title="Entrar"
-   onPress={() => router.push("/resultadoAnterior")}
-  />
+      </View>
 
-  {/* ÁREA PRO */}
+    </ScrollView>
 
-  <View style={{ marginTop:30 }}>
+  )
+}*/
 
-   <Text style={{
-    textAlign:"center",
-    fontWeight:"bold",
-    fontSize:16
-   }}>
-    ⭐ FFC LotoTech25 PRO
-   </Text>
+import { useRouter } from "expo-router"
+import { useEffect, useState } from "react"
+import {
+  Alert,
+  Animated,
+  Linking,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native"
 
-   <Text style={{ textAlign:"center" }}>
-    ✔ Escolher 6 até 9 pares
-   </Text>
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import AppButton from "../components/AppButton"
+import styles from "../styles/globalStyles"
+import { verificarPlanoServidor } from "../utils/verificarPlanoServidor"
 
-   <Text style={{ textAlign:"center" }}>
-    ✔ GERAR até 500 apostas por grupo
-   </Text>
+export default function Index() {
 
-   <Text style={{ textAlign:"center" }}>
-    ✔ Filtros avançados
-   </Text>
+  const router = useRouter()
 
-   <Text style={{ textAlign:"center" }}>
-    ✔ Escolher até 25 dezenas
-   </Text>
+  const [plano, setPlano] = useState("free")
+  const [carregando, setCarregando] = useState(true)
 
-   <Text style={{ textAlign:"center" }}>
-    ✔ Exportar histórico em PDF
-   </Text>
+  const fadeAnim = useState(new Animated.Value(0))[0]
 
-   {plano !== "pro" && (
+  useEffect(() => {
 
-    <View style={{ marginTop:10 }}>
-     <AppButton
-      title="Ativar Plano PRO"
-      onPress={ativarPro}
-     />
-    </View>
+    async function carregarPlano() {
+      const planoServidor = await verificarPlanoServidor()
+      setPlano(planoServidor)
 
-   )}
+      setTimeout(() => {
+        setCarregando(false)
+      }, 3000)
+    }
 
-   {plano === "pro" && (
+    carregarPlano()
 
-    <Text style={{
-     textAlign:"center",
-     marginTop:15,
-     fontWeight:"bold",
-     color:"green"
-    }}>
-     ⭐ Plano PRO ativo
-    </Text>
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 3000,
+      useNativeDriver: true
+    }).start()
 
-   )}
+  }, [])
 
-  </View>
-  </View>
+  // 🔥 ATIVAR PRO (COM PAGAMENTO)
+  async function ativarPro() {
+    try {
+      const userId = await AsyncStorage.getItem("usuarioId")
 
-</ScrollView>
+      if (!userId) {
+        Alert.alert("Atenção", "Faça login para ativar o plano PRO")
+        return
+      }
 
- )
+      Alert.alert(
+        "FFC LotoTech25 PRO",
+        "O plano PRO requer pagamento.\nDeseja continuar?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Continuar",
+            onPress: () => {
+              // 👉 coloque aqui seu link de pagamento futuramente
+              Linking.openURL("https://seu-link-de-pagamento.com")
+            }
+          }
+        ]
+      )
 
+    } catch (error) {
+      console.log("❌ Erro ao ativar PRO:", error)
+    }
+  }
+
+  function abrirSuporte() {
+    Linking.openURL("https://fer-fcarneiro.github.io/FFC.dev.apps/")
+  }
+
+  if (carregando) {
+    return (
+      <View style={{
+        flex: 1,
+        backgroundColor: "#0a7ea4",
+        justifyContent: "center",
+        alignItems: "center"
+      }}>
+        <Animated.Image
+          source={require("../assets/splashNovo.png")}
+          style={{
+            width: 300,
+            height: 300,
+            opacity: fadeAnim,
+            transform: [{ scale: fadeAnim }]
+          }}
+          resizeMode="contain"
+        />
+      </View>
+    )
+  }
+
+  return (
+
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingBottom: 120 }}
+    >
+
+      <View style={styles.container}>
+
+        <Text style={styles.titulo}>
+          FFC LotoTech25
+        </Text>
+
+        <Text style={{ textAlign: "center", marginBottom: 20 }}>
+          Gerador inteligente com filtros estatísticos para jogos da Lotofácil
+          e conferidor com histórico automático de jogos gerados.
+        </Text>
+
+        {/* 📊 FREE */}
+        <Text style={styles.titulo}>Plano Free</Text>
+
+        <Text>✔ Soma entre 185 até 228</Text>
+        <Text>✔ Repetidos entre 7 até 11</Text>
+        <Text>✔ Escolher até 17 dezenas</Text>
+
+        {/* ⭐ PRO */}
+        <View style={{ marginTop: 30 }}>
+
+          <Text style={{
+            textAlign: "center",
+            fontWeight: "bold",
+            fontSize: 16
+          }}>
+            ⭐ FFC LotoTech25 PRO
+          </Text>
+
+          <Text style={{ textAlign: "center" }}>
+            ✔ Escolher 6 até 9 pares
+          </Text>
+
+          <Text style={{ textAlign: "center" }}>
+            ✔ Gerar até 500 apostas
+          </Text>
+
+          <Text style={{ textAlign: "center" }}>
+            ✔ Filtros avançados
+          </Text>
+
+          <Text style={{ textAlign: "center" }}>
+            ✔ Escolher até 25 dezenas
+          </Text>
+
+          <Text style={{ textAlign: "center" }}>
+            ✔ Exportar histórico em PDF
+          </Text>
+
+          {plano === "pro" && (
+            <Text style={{
+              textAlign: "center",
+              marginTop: 15,
+              fontWeight: "bold",
+              color: "green"
+            }}>
+              ⭐ Plano PRO ativo
+            </Text>
+          )}
+
+        </View>
+
+        {/* 🆕 CADASTRO FREE */}
+        <AppButton
+          title="Criar conta FREE"
+          onPress={() => router.push("/cadastro?plano=free")}
+        />
+
+        {/* 🔥 ATIVAR PRO */}
+        {plano === "free" && (
+          <AppButton
+            title="Ativar PRO"
+            onPress={ativarPro}
+          />
+        )}
+
+        {/* 🔐 LOGIN */}
+        <AppButton
+          title="Entrar"
+          onPress={() => router.push("/login")}
+        />
+
+        {/* INFO */}
+        <Text style={{
+          marginTop: 20,
+          textAlign: "center"
+        }}>
+          O aplicativo utiliza padrões estatísticos de concursos anteriores
+          para gerar jogos mais equilibrados.
+        </Text>
+
+        <Text style={{
+          marginTop: 15,
+          textAlign: "center",
+          fontSize: 13,
+          color: "#d84949"
+        }}>
+          Atenção: este aplicativo é apenas uma ferramenta de apoio
+          matemático e estatístico. Não garante prêmios ou acertos,
+          pois os resultados das loterias são aleatórios.
+        </Text>
+
+        {/* SUPORTE */}
+        <TouchableOpacity onPress={abrirSuporte}>
+          <Text style={{
+            textAlign: "center",
+            color: "#0a7ea4",
+            marginTop: 10
+          }}>
+            Suporte
+          </Text>
+        </TouchableOpacity>
+
+      </View>
+
+    </ScrollView>
+  )
 }

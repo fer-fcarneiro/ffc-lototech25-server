@@ -1,37 +1,119 @@
+/*
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { BASE_URL } from "../utils/config"
 
-export async function verificarPlanoServidor(){
+export async function verificarPlanoServidor() {
+  try {
+    const usuarioId = await AsyncStorage.getItem("usuarioId")
 
- try{
+    if (!usuarioId) {
+      return "free"
+    }
 
-  const usuarioId = await AsyncStorage.getItem("usuarioId")
+    const url = `${BASE_URL}/users/${usuarioId}/plano`
 
-  if(!usuarioId){
-   return "free"
+    console.log("🔗 URL plano servidor:", url)
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      console.log("❌ Resposta não OK")
+      return "free"
+    }
+
+    const data = await response.json()
+
+    console.log("📦 Plano servidor:", data)
+
+    const plano = data.plano || "free"
+
+    await AsyncStorage.setItem("planoUsuario", plano)
+
+    return plano
+  } catch (error) {
+    console.log("🚨 Erro ao verificar plano:", error)
+    return "free"
   }
+} */
+// codigo 02
 
-  const response = await fetch(
-   `http://192.168.0.7:3000/users/${usuarioId}/plano`
-  )
+ /* import AsyncStorage from "@react-native-async-storage/async-storage"
+import { BASE_URL } from "../utils/config"
 
-  if(!response.ok){
-   return "free"
+export async function verificarPlanoServidor() {
+  try {
+    const usuarioId = await AsyncStorage.getItem("usuarioId")
+
+    if (!usuarioId) {
+      return "free"
+    }
+
+    const url = `${BASE_URL}/users/${usuarioId}/plano`
+
+    console.log("🔗 URL plano servidor:", url)
+
+    const response = await fetch(url)
+
+    console.log("STATUS:", response.status)
+
+    if (!response.ok) {
+      const erro = await response.json()
+      console.log("💥 ERRO REAL:", erro)
+      return "free"
+    }
+
+    const data = await response.json()
+
+    console.log("📦 Plano servidor:", data)
+
+    const plano = data.plano || "free"
+
+    await AsyncStorage.setItem("planoUsuario", plano)
+
+    return plano
+  } catch (error) {
+    console.log("🚨 Erro ao verificar plano:", error)
+    return "free"
   }
+} */
+// cod 03
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { BASE_URL } from "../utils/config"
+export async function verificarPlanoServidor() {
+  try {
+    const usuarioId = await AsyncStorage.getItem("usuarioId")
 
-  const data = await response.json()
+    console.log("🆔 ID NO STORAGE:", usuarioId) // 🔥 ADICIONA AQUI
 
-  const plano = data.plano || "free"
+    if (!usuarioId) {
+      return "free"
+    }
 
-  await AsyncStorage.setItem("planoUsuario", plano)
+    const url = `${BASE_URL}/users/${usuarioId}/plano`
 
-  return plano
+    console.log("🔗 URL plano servidor:", url)
 
- }catch(error){
+    const response = await fetch(url)
 
-  console.log("Erro ao verificar plano:", error)
+    console.log("STATUS:", response.status)
 
-  return "free"
+    if (!response.ok) {
+      const erro = await response.json()
+      console.log("💥 ERRO REAL:", erro)
+      return "free"
+    }
 
- }
+    const data = await response.json()
 
+    console.log("📦 Plano servidor:", data)
+
+    const plano = data.plano || "free"
+
+    await AsyncStorage.setItem("planoUsuario", plano)
+
+    return plano
+  } catch (error) {
+    console.log("🚨 Erro ao verificar plano:", error)
+    return "free"
+  }
 }
