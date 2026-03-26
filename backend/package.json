@@ -11,6 +11,11 @@
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+<<<<<<< HEAD
     "mongoose": "^8.5.0"
+=======
+    "mongoose": "^8.5.0",
+    "sqlite3": "^6.0.1"
+>>>>>>> 938ba3743b7d99fa254e3989fdeae88d8be00fec
   }
 }
