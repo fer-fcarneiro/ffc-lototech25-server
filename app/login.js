@@ -1,302 +1,157 @@
-/*import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useRouter } from "expo-router"
-import { useState } from "react"
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native"
-import AppButton from "../components/AppButton"
-import styles from "../styles/globalStyles"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import AppButton from "../components/AppButton";
+import styles from "../styles/globalStyles";
+import { BASE_URL } from "../utils/config";
 
 export default function Login() {
+  const router = useRouter();
 
- const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
 
- const [email, setEmail] = useState("")
- const [senha, setSenha] = useState("")
+  async function entrar() {
+    try {
+      const response = await fetch(`${BASE_URL}/users/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          senha,
+        }),
+      });
 
- async function entrar() {
+      const data = await response.json();
 
-  try {
+      console.log("RESPOSTA SERVIDOR:", data);
 
-   const response = await fetch("http://192.168.0.7:3000/users/login", {
-    method: "POST",
-    headers: {
-     "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-     email,
-     senha
-    })
-   })
-
-   const data = await response.json()
-
-   console.log("RESPOSTA SERVIDOR:", data)
-
-   if(response.ok){
-
+      if (response.ok) {
+        /*
     await AsyncStorage.setItem("usuarioId", data.id.toString())
     await AsyncStorage.setItem("emailUsuario", data.email)
-    await AsyncStorage.setItem("planoUsuario", data.plano)
+    await AsyncStorage.setItem("planoUsuario", data.plano) */
+        await AsyncStorage.setItem("userId", data.id.toString());
+        await AsyncStorage.setItem("email", data.email);
+        await AsyncStorage.setItem("plano", data.plano);
 
-    if(data.plano === "aguardando_pagamento"){
+        // 🔥 DEBUG
+        const id = await AsyncStorage.getItem("userId");
+        console.log("🆔 ID SALVO:", id);
 
-     Alert.alert(
-      "Plano PRO",
-      "Pagamento em análise. Enquanto isso você continua usando o plano FREE.",
-      [
-       {
-        text:"OK",
-        onPress:()=>router.replace("/")
-       }
-      ]
-     )
+        if (data.plano === "aguardando_pagamento") {
+          Alert.alert(
+            "Plano PRO",
+            "Pagamento em análise. Enquanto isso você continua usando o plano FREE.",
+            [
+              {
+                text: "OK",
+                onPress: () => router.replace("/resultadoAnterior"),
+              },
+            ],
+          );
 
-     return
-    }
+          return;
+        }
 
-    Alert.alert(
-     "Sucesso",
-     "Login realizado com sucesso",
-     [
-      {
-       text:"OK",
-       onPress:()=>router.replace("/")
+        Alert.alert("Sucesso", "Login realizado com sucesso", [
+          {
+            text: "OK",
+            onPress: () => router.replace("/resultadoAnterior"),
+          },
+        ]);
+      } else {
+        Alert.alert("Erro", data.erro || "Email ou senha inválidos");
       }
-     ]
-    )
+    } catch (error) {
+      console.log("ERRO:", error);
 
-   }else{
-
-    Alert.alert("Erro", data.erro || "Email ou senha inválidos")
-
-   }
-
-  } catch (error) {
-
-   console.log("ERRO:", error)
-
-   Alert.alert("Erro", "Falha ao conectar com servidor")
-
+      Alert.alert("Erro", "Falha ao conectar com servidor");
+    }
   }
 
- }
+  return (
+    <View style={styles.container}>
+      <Text
+        style={{
+          fontSize: 28,
+          fontWeight: "bold",
+          textAlign: "center",
+          marginBottom: 30,
+        }}
+      >
+        FFC LotoTech25
+      </Text>
 
- return (
+      <View
+        style={{
+          backgroundColor: "#fff",
+          padding: 20,
+          borderRadius: 10,
+          width: "100%",
+          maxWidth: 400,
+          alignSelf: "center",
+          elevation: 3,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            marginBottom: 20,
+            textAlign: "center",
+          }}
+        >
+          Login
+        </Text>
 
-  <View style={styles.container}>
+        <TextInput
+          placeholder="Seu email"
+          value={email}
+          onChangeText={setEmail}
+          style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            padding: 12,
+            borderRadius: 8,
+            marginBottom: 15,
+          }}
+        />
 
-   <Text style={styles.titulo}>
-    Login
-   </Text>
+        <TextInput
+          placeholder="Sua senha"
+          value={senha}
+          onChangeText={setSenha}
+          secureTextEntry
+          style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            padding: 12,
+            borderRadius: 8,
+            marginBottom: 20,
+          }}
+        />
 
-   <TextInput
-    placeholder="Email"
-    value={email}
-    onChangeText={setEmail}
-    style={{
-     borderWidth:1,
-     padding:10,
-     marginBottom:10
-    }}
-   />
+        <AppButton title="Entrar" onPress={entrar} />
 
-   <TextInput
-    placeholder="Senha"
-    value={senha}
-    onChangeText={setSenha}
-    secureTextEntry
-    style={{
-     borderWidth:1,
-     padding:10,
-     marginBottom:20
-    }}
-   />
-
-   <AppButton
-    title="Entrar"
-    onPress={entrar}
-   />
-
-   <TouchableOpacity
-    onPress={()=>router.push("/cadastro")}
-    style={{marginTop:20}}
-   >
-    <Text style={{textAlign:"center",color:"#007bff"}}>
-     Criar nova conta
-    </Text>
-   </TouchableOpacity>
-
-  </View>
-
- )
-
-}
-*/
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useRouter } from "expo-router"
-import { useState } from "react"
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native"
-import AppButton from "../components/AppButton"
-import styles from "../styles/globalStyles"
-import { BASE_URL } from "../utils/config"
-
-export default function Login() {
-
- const router = useRouter()
-
- const [email, setEmail] = useState("")
- const [senha, setSenha] = useState("")
-
- async function entrar() {
-
-  try {
-
-   const response = await fetch(`${BASE_URL}/users/login`, {
-    method: "POST",
-    headers: {
-     "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-     email,
-     senha
-    })
-   })
-
-   const data = await response.json()
-
-   console.log("RESPOSTA SERVIDOR:", data)
-
-   if(response.ok){
-   
-   
-
-    await AsyncStorage.setItem("usuarioId", data.id.toString())
-    await AsyncStorage.setItem("emailUsuario", data.email)
-    await AsyncStorage.setItem("planoUsuario", data.plano)
-
-    if(data.plano === "aguardando_pagamento"){
-
-     Alert.alert(
-      "Plano PRO",
-      "Pagamento em análise. Enquanto isso você continua usando o plano FREE.",
-      [
-       {
-        text:"OK",
-        onPress:()=>router.replace("/resultadoAnterior")
-       }
-      ]
-     )
-
-     return
-    }
-
-    Alert.alert(
-     "Sucesso",
-     "Login realizado com sucesso",
-     [
-      {
-       text:"OK",
-       onPress:()=>router.replace("/resultadoAnterior")
-      }
-     ]
-    )
-
-   }else{
-
-    Alert.alert("Erro", data.erro || "Email ou senha inválidos")
-
-   }
-
-  } catch (error) {
-
-   console.log("ERRO:", error)
-
-   Alert.alert("Erro", "Falha ao conectar com servidor")
-
-  }
-
- }
-
- return (
-
-  <View style={styles.container}>
-
-   <Text style={{
-    fontSize:28,
-    fontWeight:"bold",
-    textAlign:"center",
-    marginBottom:30
-   }}>
-    FFC LotoTech25
-   </Text>
-
-   <View style={{
-    backgroundColor:"#fff",
-    padding:20,
-    borderRadius:10,
-    width:"100%",
-    maxWidth:400,
-    alignSelf:"center",
-    elevation:3
-   }}>
-
-    <Text style={{
-     fontSize:20,
-     fontWeight:"bold",
-     marginBottom:20,
-     textAlign:"center"
-    }}>
-     Login
-    </Text>
-
-    <TextInput
-     placeholder="Seu email"
-     value={email}
-     onChangeText={setEmail}
-     style={{
-      borderWidth:1,
-      borderColor:"#ccc",
-      padding:12,
-      borderRadius:8,
-      marginBottom:15
-     }}
-    />
-
-    <TextInput
-     placeholder="Sua senha"
-     value={senha}
-     onChangeText={setSenha}
-     secureTextEntry
-     style={{
-      borderWidth:1,
-      borderColor:"#ccc",
-      padding:12,
-      borderRadius:8,
-      marginBottom:20
-     }}
-    />
-
-    <AppButton
-     title="Entrar"
-     onPress={entrar}
-    />
-
-    <TouchableOpacity
-     onPress={()=>router.push("/cadastro")}
-     style={{marginTop:20}}
-    >
-     <Text style={{
-      textAlign:"center",
-      color:"#0a7ea4",
-      fontWeight:"bold"
-     }}>
-      Criar nova conta Pró
-     </Text>
-    </TouchableOpacity>
-
-   </View>
-
-  </View>
-
- )
-
+        <TouchableOpacity
+          onPress={() => router.push("/cadastro")}
+          style={{ marginTop: 20 }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              color: "#0a7ea4",
+              fontWeight: "bold",
+            }}
+          >
+            Criar nova conta Pró
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 }
