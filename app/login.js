@@ -34,12 +34,12 @@ export default function Login() {
     await AsyncStorage.setItem("usuarioId", data.id.toString())
     await AsyncStorage.setItem("emailUsuario", data.email)
     await AsyncStorage.setItem("planoUsuario", data.plano) */
-        await AsyncStorage.setItem("userId", data.id.toString());
+        await AsyncStorage.setItem("usuarioId", data.id.toString());
         await AsyncStorage.setItem("email", data.email);
         await AsyncStorage.setItem("plano", data.plano);
 
-        // 🔥 DEBUG
-        const id = await AsyncStorage.getItem("userId");
+        // 🔥 DEBUG CORRETO
+        const id = await AsyncStorage.getItem("usuarioId");
         console.log("🆔 ID SALVO:", id);
 
         if (data.plano === "aguardando_pagamento") {
