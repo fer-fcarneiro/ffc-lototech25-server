@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 console.log("🚀 Iniciando servidor...");
 
 const app = require("./app");

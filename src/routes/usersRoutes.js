@@ -1,7 +1,11 @@
-/*const express = require("express");
-const router = express.Router();
-const bcrypt = require("bcrypt");
-const User = require("../models/User");
+const express = require("express")
+const router = express.Router()
+const bcrypt = require("bcrypt")
+const User = require("../models/User")
+
+const {
+  consultarAssinatura
+} = require("../services/googlePlayService")
 
 // ==========================
 // LISTAR USUÁRIOS
@@ -9,12 +13,17 @@ const User = require("../models/User");
 
 router.get("/", async (req, res) => {
   try {
-    const users = await User.find().select("-senha");
-    res.json(users);
+    const users = await User.find().select("-senha")
+
+    res.json(users)
+
   } catch (error) {
-    res.status(500).json({ erro: "Erro ao listar usuários" });
+
+    res.status(500).json({
+      erro: "Erro ao listar usuários"
+    })
   }
-});
+})
 
 // ==========================
 // CADASTRO
@@ -22,45 +31,52 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { email, senha, plano } = req.body;
+
+    const { email, senha, plano } = req.body
 
     if (!email || !senha) {
+
       return res.status(400).json({
-        erro: "Email e senha são obrigatórios",
-      });
+        erro: "Email e senha são obrigatórios"
+      })
     }
 
     const existe = await User.findOne({
-      email: email.toLowerCase(),
-    });
+      email: email.toLowerCase()
+    })
 
     if (existe) {
+
       return res.status(400).json({
-        erro: "Email já cadastrado",
-      });
+        erro: "Email já cadastrado"
+      })
     }
 
-    const senhaHash = await bcrypt.hash(senha, 10);
+    const senhaHash = await bcrypt.hash(senha, 10)
 
     const novoUser = new User({
       email: email.toLowerCase(),
       senha: senhaHash,
-      plano: plano || "free",
-    });
+      plano: plano || "free"
+    })
 
-    await novoUser.save();
+    await novoUser.save()
 
-    console.log("USUÁRIO SALVO:", novoUser);
+    console.log("USUÁRIO SALVO:", novoUser)
 
     res.status(201).json({
       id: novoUser._id,
       email: novoUser.email,
-      plano: novoUser.plano,
-    });
+      plano: novoUser.plano
+    })
+
   } catch (error) {
-    res.status(500).json({ erro: "Erro no cadastro" });
+
+    res.status(500).json({
+      erro: "Erro no cadastro"
+    })
   }
-});
+})
 
 // ==========================
 // LOGIN
@@ -68,41 +84,52 @@ router.post("/", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { email, senha } = req.body;
+
+    const { email, senha } = req.body
 
     if (!email || !senha) {
+
       return res.status(400).json({
-        erro: "Email e senha são obrigatórios",
-      });
+        erro: "Email e senha são obrigatórios"
+      })
     }
 
     const user = await User.findOne({
-      email: email.toLowerCase(),
-    });
+      email: email.toLowerCase()
+    })
 
     if (!user) {
+
       return res.status(401).json({
-        erro: "Email ou senha inválidos",
-      });
+        erro: "Email ou senha inválidos"
+      })
     }
 
-    const senhaValida = await bcrypt.compare(senha, user.senha);
+    const senhaValida = await bcrypt.compare(
+      senha,
+      user.senha
+    )
 
     if (!senhaValida) {
+
       return res.status(401).json({
-        erro: "Email ou senha inválidos",
-      });
+        erro: "Email ou senha inválidos"
+      })
     }
 
     res.json({
       id: user._id,
       email: user.email,
-      plano: user.plano,
-    });
+      plano: user.plano
+    })
+
   } catch (error) {
-    res.status(500).json({ erro: "Erro no login" });
+
+    res.status(500).json({
+      erro: "Erro no login"
+    })
   }
-});
+})
 
 // ==========================
 // BUSCAR USUÁRIO
@@ -110,19 +137,27 @@ router.post("/login", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-senha");
+
+    const user = await User.findById(
+      req.params.id
+    ).select("-senha")
 
     if (!user) {
+
       return res.status(404).json({
-        erro: "Usuário não encontrado",
-      });
+        erro: "Usuário não encontrado"
+      })
     }
 
-    res.json(user);
+    res.json(user)
+
   } catch (error) {
-    res.status(500).json({ erro: "Erro ao buscar usuário" });
+
+    res.status(500).json({
+      erro: "Erro ao buscar usuário"
+    })
   }
-});
+})
 
 // ==========================
 // VERIFICAR PLANO
@@ -130,293 +165,136 @@ router.get("/:id", async (req, res) => {
 
 router.get("/:id/plano", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+
+    const user = await User.findById(
+      req.params.id
+    )
 
     if (!user) {
+
       return res.status(404).json({
-        erro: "Usuário não encontrado",
-      });
+        erro: "Usuário não encontrado"
+      })
     }
 
     res.json({
       id: user._id,
-      plano: user.plano,
-    });
+      plano: user.plano
+    })
+
   } catch (error) {
-    res.status(500).json({ erro: "Erro ao verificar plano" });
+
+    res.status(500).json({
+      erro: "Erro ao verificar plano"
+    })
   }
-});
+})
 
 // ==========================
-// ATUALIZAR USUÁRIO
+// VALIDAR ASSINATURA GOOGLE PLAY
 // ==========================
 
-router.put("/:id", async (req, res) => {
+router.post("/:id/assinatura/google-play", async (req, res) => {
+
   try {
-    const user = await User.findById(req.params.id);
+
+    const { purchaseToken } = req.body
+
+    if (!purchaseToken) {
+
+      return res.status(400).json({
+        erro: "purchaseToken é obrigatório"
+      })
+    }
+
+    const user = await User.findById(
+      req.params.id
+    )
 
     if (!user) {
+
       return res.status(404).json({
-        erro: "Usuário não encontrado",
-      });
+        erro: "Usuário não encontrado"
+      })
     }
 
-    if (req.body.email) {
-      user.email = req.body.email.toLowerCase();
-    }
+    console.log(
+      "=== VALIDANDO ASSINATURA GOOGLE PLAY ==="
+    )
 
-    if (req.body.senha) {
-      user.senha = await bcrypt.hash(req.body.senha, 10);
-    }
+    console.log(
+      "Usuário:",
+      user._id
+    )
 
-    if (req.body.plano) {
-      user.plano = req.body.plano;
-    }
+    console.log(
+      "Produto: pro_anual"
+    )
 
-    await user.save();
+    const assinatura =
+      await consultarAssinatura(purchaseToken)
 
-    res.json({
-      id: user._id,
-      email: user.email,
-      plano: user.plano,
-    });
-  } catch (error) {
-    res.status(500).json({ erro: "Erro ao atualizar usuário" });
-  }
-});
+    console.log(
+      "Assinatura recebida:",
+      JSON.stringify(
+        assinatura,
+        null,
+        2
+      )
+    )
 
-// ==========================
-// REMOVER USUÁRIO
-// ==========================
+    const estado =
+      assinatura?.subscriptionState
 
-router.delete("/:id", async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.params.id);
+    console.log(
+      "Estado da assinatura:",
+      estado
+    )
 
-    res.json({
-      mensagem: "Usuário removido",
-    });
-  } catch (error) {
-    res.status(500).json({ erro: "Erro ao remover usuário" });
-  }
-});
+    if (
+      estado ===
+      "SUBSCRIPTION_STATE_ACTIVE"
+    ) {
 
-module.exports = router;
-*/
+      user.plano = "pro"
 
-// cod atulizado no mesmo momento que acabei de atualizar o index.js.
-const express = require("express");
-const router = express.Router();
-const bcrypt = require("bcrypt");
-const User = require("../models/User");
+      await user.save()
 
-// 🔥 GOOGLE PLAY API
-const { google } = require("googleapis");
-
-const auth = new google.auth.GoogleAuth({
-  keyFile: "service-account.json", // 🔐 coloque seu arquivo aqui
-  scopes: ["https://www.googleapis.com/auth/androidpublisher"],
-});
-
-const androidpublisher = google.androidpublisher({
-  version: "v3",
-  auth,
-});
-
-// ==========================
-// LISTAR USUÁRIOS
-// ==========================
-
-router.get("/", async (req, res) => {
-  try {
-    const users = await User.find().select("-senha");
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ erro: "Erro ao listar usuários" });
-  }
-});
-
-// ==========================
-// CADASTRO
-// ==========================
-
-router.post("/", async (req, res) => {
-  try {
-    const { email, senha, plano } = req.body;
-
-    if (!email || !senha) {
-      return res.status(400).json({
-        erro: "Email e senha são obrigatórios",
-      });
-    }
-
-    const existe = await User.findOne({
-      email: email.toLowerCase(),
-    });
-
-    if (existe) {
-      return res.status(400).json({
-        erro: "Email já cadastrado",
-      });
-    }
-
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    const novoUser = new User({
-      email: email.toLowerCase(),
-      senha: senhaHash,
-      plano: plano || "free",
-    });
-
-    await novoUser.save();
-
-    res.status(201).json({
-      id: novoUser._id,
-      email: novoUser.email,
-      plano: novoUser.plano,
-    });
-  } catch (error) {
-    res.status(500).json({ erro: "Erro no cadastro" });
-  }
-});
-
-// ==========================
-// LOGIN
-// ==========================
-
-router.post("/login", async (req, res) => {
-  try {
-    const { email, senha } = req.body;
-
-    if (!email || !senha) {
-      return res.status(400).json({
-        erro: "Email e senha são obrigatórios",
-      });
-    }
-
-    const user = await User.findOne({
-      email: email.toLowerCase(),
-    });
-
-    if (!user) {
-      return res.status(401).json({
-        erro: "Email ou senha inválidos",
-      });
-    }
-
-    const senhaValida = await bcrypt.compare(senha, user.senha);
-
-    if (!senhaValida) {
-      return res.status(401).json({
-        erro: "Email ou senha inválidos",
-      });
-    }
-
-    res.json({
-      id: user._id,
-      email: user.email,
-      plano: user.plano,
-    });
-  } catch (error) {
-    res.status(500).json({ erro: "Erro no login" });
-  }
-});
-
-// ==========================
-// BUSCAR USUÁRIO
-// ==========================
-
-router.get("/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select("-senha");
-
-    if (!user) {
-      return res.status(404).json({
-        erro: "Usuário não encontrado",
-      });
-    }
-
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ erro: "Erro ao buscar usuário" });
-  }
-});
-
-// ==========================
-// VERIFICAR PLANO
-// ==========================
-
-router.get("/:id/plano", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({
-        erro: "Usuário não encontrado",
-      });
-    }
-
-    res.json({
-      id: user._id,
-      plano: user.plano,
-    });
-  } catch (error) {
-    res.status(500).json({ erro: "Erro ao verificar plano" });
-  }
-});
-
-// ==========================
-// 🔐 VALIDAR COMPRA (PLAY STORE)
-// ==========================
-
-router.post("/validar-compra", async (req, res) => {
-  try {
-    const { userId, purchaseToken } = req.body;
-
-    if (!userId || !purchaseToken) {
-      return res.status(400).json({
-        erro: "Dados incompletos",
-      });
-    }
-
-    const response = await androidpublisher.purchases.subscriptions.get({
-      packageName: "com.ffc.lototech25", // 🔥 ALTERAR se necessário
-      subscriptionId: "pro_anual",
-      token: purchaseToken,
-    });
-
-    const compra = response.data;
-
-    // 🔥 pagamento confirmado
-    if (compra.paymentState === 1) {
-      const user = await User.findById(userId);
-
-      if (!user) {
-        return res.status(404).json({
-          erro: "Usuário não encontrado",
-        });
-      }
-
-      user.plano = "pro";
-      await user.save();
+      console.log(
+        "PLANO PRO ATIVADO:",
+        user._id
+      )
 
       return res.json({
         sucesso: true,
         plano: "pro",
-      });
+        estado: estado
+      })
     }
 
     return res.status(400).json({
-      erro: "Pagamento não confirmado",
-    });
-  } catch (error) {
-    console.log("❌ ERRO VALIDAÇÃO:", error);
+      sucesso: false,
+      plano: user.plano,
+      estado: estado,
+      erro: "Assinatura não está ativa"
+    })
 
-    res.status(500).json({
-      erro: "Erro ao validar compra",
-    });
+  } catch (error) {
+
+    console.log(
+      "=== ERRO AO VALIDAR ASSINATURA ==="
+    )
+
+    console.log(
+      error.response?.data ||
+      error.message
+    )
+
+    return res.status(500).json({
+      erro: "Erro ao validar assinatura Google Play"
+    })
   }
-});
+})
 
 // ==========================
 // ATUALIZAR USUÁRIO
@@ -424,38 +302,54 @@ router.post("/validar-compra", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+
+    const user = await User.findById(
+      req.params.id
+    )
 
     if (!user) {
+
       return res.status(404).json({
-        erro: "Usuário não encontrado",
-      });
+        erro: "Usuário não encontrado"
+      })
     }
 
     if (req.body.email) {
-      user.email = req.body.email.toLowerCase();
+
+      user.email =
+        req.body.email.toLowerCase()
     }
 
     if (req.body.senha) {
-      user.senha = await bcrypt.hash(req.body.senha, 10);
+
+      user.senha =
+        await bcrypt.hash(
+          req.body.senha,
+          10
+        )
     }
 
-    // ⚠️ CUIDADO (mantido, mas não recomendado para produção)
     if (req.body.plano) {
-      user.plano = req.body.plano;
+
+      user.plano =
+        req.body.plano
     }
 
-    await user.save();
+    await user.save()
 
     res.json({
       id: user._id,
       email: user.email,
-      plano: user.plano,
-    });
+      plano: user.plano
+    })
+
   } catch (error) {
-    res.status(500).json({ erro: "Erro ao atualizar usuário" });
+
+    res.status(500).json({
+      erro: "Erro ao atualizar usuário"
+    })
   }
-});
+})
 
 // ==========================
 // REMOVER USUÁRIO
@@ -463,14 +357,21 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
+
+    await User.findByIdAndDelete(
+      req.params.id
+    )
 
     res.json({
-      mensagem: "Usuário removido",
-    });
-  } catch (error) {
-    res.status(500).json({ erro: "Erro ao remover usuário" });
-  }
-});
+      mensagem: "Usuário removido"
+    })
 
-module.exports = router;
+  } catch (error) {
+
+    res.status(500).json({
+      erro: "Erro ao remover usuário"
+    })
+  }
+})
+
+module.exports = router
