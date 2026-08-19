@@ -1,237 +1,10 @@
 
-/*
-const express = require("express")
-const fs = require("fs")
-const path = require("path")
-
-const router = express.Router()
-
-// caminho absoluto
-const USERS_FILE = path.join(__dirname, "../users.json")
-
-// ==========================
-// LER USUÁRIOS
-// ==========================
-
-function lerUsuarios(){
- try {
-
-  if(!fs.existsSync(USERS_FILE)){
-   fs.writeFileSync(USERS_FILE, "[]")
-  }
-
-  const data = fs.readFileSync(USERS_FILE, "utf-8")
-
-  if(!data){
-   return []
-  }
-
-  return JSON.parse(data)
-
- } catch (error) {
-  console.log("Erro ao ler usuários:", error)
-  return []
- }
-}
-
-// ==========================
-// SALVAR USUÁRIOS
-// ==========================
-
-function salvarUsuarios(users){
- try {
-  fs.writeFileSync(
-   USERS_FILE,
-   JSON.stringify(users, null, 2)
-  )
- } catch (error) {
-  console.log("Erro ao salvar usuários:", error)
- }
-}
-
-// ==========================
-// LISTAR USUÁRIOS
-// ==========================
-
-router.get("/", (req,res)=>{
- const users = lerUsuarios()
- res.json(users)
-})
-
-// ==========================
-// CADASTRO
-// ==========================
-
-router.post("/", (req,res)=>{
-
- const { email, senha, plano } = req.body
-
- if(!email || !senha){
-  return res.status(400).json({
-   erro:"Email e senha são obrigatórios"
-  })
- }
-
- const users = lerUsuarios()
-
- const existe = users.find(
-  u => u.email.toLowerCase() === email.toLowerCase()
- )
-
- if(existe){
-  return res.status(400).json({
-   erro:"Email já cadastrado"
-  })
- }
-
- const novoUser = {
-  id: Date.now(),
-  email,
-  senha,
-  plano: plano || "free"
- }
-
- users.push(novoUser)
-
- salvarUsuarios(users)
-
- console.log("USUÁRIO SALVO:", novoUser)
-
- res.json(novoUser)
-
-})
-
-// ==========================
-// LOGIN
-// ==========================
-
-router.post("/login",(req,res)=>{
-
- const { email, senha } = req.body
-
- const users = lerUsuarios()
-
- const user = users.find(
-  u => u.email.toLowerCase() === email.toLowerCase() &&
-       u.senha === senha
- )
-
- if(!user){
-  return res.status(401).json({
-   erro:"Email ou senha inválidos"
-  })
- }
-
- res.json({
-  id:user.id,
-  email:user.email,
-  plano:user.plano
- })
-
-})
-
-// ==========================
-// BUSCAR USUÁRIO
-// ==========================
-
-router.get("/:id",(req,res)=>{
-
- const id = parseInt(req.params.id)
-
- const users = lerUsuarios()
-
- const user = users.find(u => u.id === id)
-
- if(!user){
-  return res.status(404).json({
-   erro:"Usuário não encontrado"
-  })
- }
-
- res.json(user)
-
-})
-
-// ==========================
-// VERIFICAR PLANO
-// ==========================
-
-router.get("/:id/plano",(req,res)=>{
-
- const id = parseInt(req.params.id)
-
- const users = lerUsuarios()
-
- const user = users.find(u => u.id === id)
-
- if(!user){
-  return res.status(404).json({
-   erro:"Usuário não encontrado"
-  })
- }
-
- res.json({
-  id:user.id,
-  plano:user.plano
- })
-
-})
-
-// ==========================
-// ATUALIZAR USUÁRIO
-// ==========================
-
-router.put("/:id",(req,res)=>{
-
- const id = parseInt(req.params.id)
-
- const users = lerUsuarios()
-
- const user = users.find(u => u.id === id)
-
- if(!user){
-  return res.status(404).json({
-   erro:"Usuário não encontrado"
-  })
- }
-
- user.email = req.body.email ?? user.email
- user.senha = req.body.senha ?? user.senha
-
- // ⚠️ permite mudar plano (ok por enquanto)
- user.plano = req.body.plano ?? user.plano
-
- salvarUsuarios(users)
-
- res.json(user)
-
-})
-
-// ==========================
-// REMOVER USUÁRIO
-// ==========================
-
-router.delete("/:id",(req,res)=>{
-
- const id = parseInt(req.params.id)
-
- let users = lerUsuarios()
-
- users = users.filter(u => u.id !== id)
-
- salvarUsuarios(users)
-
- res.json({
-  mensagem:"Usuário removido"
- })
-
-})
-
-module.exports = router */
-
 const express = require("express")
 const router = express.Router()
 const User = require("../models/User")
+const {
+  consultarAssinatura
+} = require("../services/googlePlayService")
 
 // ==========================
 // LISTAR USUÁRIOS
@@ -405,5 +178,85 @@ router.delete("/:id", async (req, res) => {
   res.status(500).json({ erro: "Erro ao remover usuário" })
  }
 })
+// ==========================
+// VALIDAR ASSINATURA GOOGLE PLAY
+// ==========================
 
+router.post("/:id/assinatura/google-play", async (req, res) => {
+
+  try {
+
+    const { purchaseToken } = req.body
+
+    if (!purchaseToken) {
+
+      return res.status(400).json({
+        erro: "purchaseToken é obrigatório"
+      })
+
+    }
+
+    const user = await User.findById(req.params.id)
+
+    if (!user) {
+
+      return res.status(404).json({
+        erro: "Usuário não encontrado"
+      })
+
+    }
+
+    console.log("=== VALIDANDO ASSINATURA GOOGLE PLAY ===")
+    console.log("Usuário:", user._id)
+    console.log("Produto: pro_anual")
+
+    const assinatura =
+      await consultarAssinatura(purchaseToken)
+
+    console.log(
+      "Assinatura recebida:",
+      JSON.stringify(assinatura, null, 2)
+    )
+
+    const estado = assinatura?.subscriptionState
+
+    console.log("Estado da assinatura:", estado)
+
+    if (
+      estado === "SUBSCRIPTION_STATE_ACTIVE"
+    ) {
+
+      user.plano = "pro"
+
+      await user.save()
+
+      console.log("PLANO PRO ATIVADO:", user._id)
+
+      return res.json({
+        sucesso: true,
+        plano: "pro",
+        estado: estado
+      })
+    }
+
+    return res.status(400).json({
+      sucesso: false,
+      plano: user.plano,
+      estado: estado,
+      erro: "Assinatura não está ativa"
+    })
+
+  } catch (error) {
+
+    console.log("=== ERRO AO VALIDAR ASSINATURA ===")
+
+    console.log(
+      error.response?.data || error.message
+    )
+
+    return res.status(500).json({
+      erro: "Erro ao validar assinatura Google Play"
+    })
+  }
+})
 module.exports = router

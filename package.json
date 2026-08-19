@@ -6,11 +6,12 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js"
-   
   },
   "dependencies": {
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "googleapis": "^175.0.0",
     "mongoose": "^8.5.0",
     "sqlite3": "^6.0.1"
   }
