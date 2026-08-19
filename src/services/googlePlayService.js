@@ -1,31 +1,11 @@
-/*const { google } = require("googleapis")
-const path = require("path")
 
-const auth = new google.auth.GoogleAuth({
-  keyFile: path.join(
-    __dirname,
-    "../../credentials/ffc-lototech25-36ec8de9b20c.json"
-  ),
-  scopes: [
-    "https://www.googleapis.com/auth/androidpublisher"
-  ]
-})
-
-const androidPublisher = google.androidpublisher({
-  version: "v3",
-  auth
-})
-
-module.exports = {
-  androidPublisher
-}*/
 const { google } = require("googleapis")
 const path = require("path")
 
 const auth = new google.auth.GoogleAuth({
   keyFile: path.join(
     __dirname,
-    "../../credentials/ffc-lototech25-36ec8de9b20c.json"
+    "../../ffc-lototech25-36ec8de9b20c.json"
   ),
   scopes: [
     "https://www.googleapis.com/auth/androidpublisher"
